@@ -162,7 +162,23 @@ OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.1
 ```
 
-Frontend hiện đang gọi API theo địa chỉ cố định `localhost:5000` và `localhost:8000` trong code.
+### `frontend/.env`
+
+Khi chạy local:
+
+```env
+VITE_BACKEND_API_URL=http://localhost:5000
+VITE_AI_CORE_API_URL=http://localhost:8000
+```
+
+Khi deploy lên Vercel, đặt 2 biến môi trường này trong **Project Settings -> Environment Variables**:
+
+```env
+VITE_BACKEND_API_URL=https://<backend-render-service>.onrender.com
+VITE_AI_CORE_API_URL=https://<ai-core-render-service>.onrender.com
+```
+
+Lưu ý: không dùng `localhost` trên Vercel. Trên điện thoại, `localhost` là chính điện thoại nên sẽ gây lỗi `Failed to fetch`.
 
 ## 3. Cài dependencies
 

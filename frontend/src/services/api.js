@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { BACKEND_API } from '../lib/constants';
 
-// Khởi tạo instance axios với baseURL trỏ vào reverse proxy '/api' của Vite
+// Khởi tạo instance axios theo URL backend của môi trường hiện tại.
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: `${BACKEND_API}/api`,
   headers: {
     'Content-Type': 'application/json'
   }

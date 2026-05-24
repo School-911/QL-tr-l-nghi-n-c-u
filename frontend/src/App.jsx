@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { AI_CORE_API, HISTORY_PAGE_SIZE, THEME_STORAGE_KEY } from './lib/constants';
+import { AI_CORE_API, BACKEND_API, HISTORY_PAGE_SIZE, THEME_STORAGE_KEY } from './lib/constants';
 import { getPersonalWorkspaceId, getRangeDates, getSavedTheme, isStrongPassword, isWithinRange, startOfDay } from './lib/helpers';
 import { AuthScreen } from './components/AuthScreen';
 import { AppHeader } from './components/AppHeader';
@@ -366,7 +366,7 @@ function App() {
       return;
     }
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(`${BACKEND_API}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -403,7 +403,7 @@ function App() {
       return;
     }
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch(`${BACKEND_API}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fullName, email, password })
@@ -429,7 +429,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
+      const response = await fetch(`${BACKEND_API}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: resetEmail.trim() })
@@ -459,7 +459,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/reset-password', {
+      const response = await fetch(`${BACKEND_API}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -587,7 +587,7 @@ function App() {
       formData.append('workspaceId', currentWorkspaceId);
       files.forEach((file) => formData.append('file', file));
       setProgressPhase('AI đang phân tích tài liệu và tổng hợp báo cáo...');
-      const response = await fetch('http://localhost:5000/api/research/upload', {
+      const response = await fetch(`${BACKEND_API}/api/research/upload`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData
