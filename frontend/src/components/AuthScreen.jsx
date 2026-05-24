@@ -48,18 +48,18 @@ export function AuthScreen({
         : handleResetPassword;
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#070c14] p-6 text-slate-100">
+    <div className="relative flex min-h-[100dvh] items-start justify-center overflow-y-auto overflow-x-hidden bg-[#070c14] px-4 py-5 text-slate-100 sm:items-center sm:p-6">
       <div className="pointer-events-none absolute -left-40 -top-40 h-96 w-96 rounded-full bg-blue-600/10 blur-[100px]" />
       <div className="pointer-events-none absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-indigo-600/10 blur-[100px]" />
       <div className="w-full max-w-md animate-fade-in">
-        <div className="mb-8 text-center">
-          <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-700 shadow-lg shadow-blue-500/20">
-            <Sparkles className="h-7 w-7 text-white" />
+        <div className="mb-4 text-center sm:mb-8">
+          <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-700 shadow-lg shadow-blue-500/20 sm:mb-4 sm:h-14 sm:w-14">
+            <Sparkles className="h-6 w-6 text-white sm:h-7 sm:w-7" />
           </div>
-          <h1 className="text-2xl font-extrabold tracking-normal">School Research</h1>
-          <p className="mt-1 text-xs text-slate-400">Trợ lý nghiên cứu và tổng hợp kiến thức AI</p>
+          <h1 className="text-xl font-extrabold tracking-normal sm:text-2xl">School Research</h1>
+          <p className="mt-1 text-xs leading-5 text-slate-400">Trợ lý nghiên cứu và tổng hợp kiến thức AI</p>
         </div>
-        <section className="relative rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl backdrop-blur-xl">
+        <section className="relative rounded-2xl border border-white/10 bg-slate-900/70 p-5 shadow-2xl backdrop-blur-xl sm:rounded-3xl sm:p-8">
           <h2 className="mb-6 text-lg font-bold text-slate-100">{title}</h2>
           {authError && (
             <div className="mb-5 flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-xs text-red-300">
