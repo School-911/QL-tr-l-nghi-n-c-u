@@ -170,9 +170,7 @@ function App() {
         limit: '200',
         workspace_id: workspaceId
       });
-      if (workspaceId === personalWorkspaceId) {
-        params.set('include_legacy', 'true');
-      }
+      if (userId) params.set('user_id', userId);
       const data = await apiRequest(`/research/history?${params.toString()}`);
       setHistoryItems(data.items || []);
     } catch (error) {
@@ -220,7 +218,7 @@ function App() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedHistorySearch(historySearch.trim().toLowerCase());
+      setDebouncedHistorySearch(historySearch.replace(/\D/g, ''));
     }, 250);
     return () => clearTimeout(timer);
   }, [historySearch]);
@@ -240,20 +238,18 @@ function App() {
 
   const filteredHistory = useMemo(() => {
     return historyItems.filter((item) => {
-      const searchableText = [
+      const numericSearchText = [
         item.id,
-        item.title,
-        item.query,
-        item.source,
-        item.sourceType,
-        item.status,
         item.createdAt,
-        item.files?.join(' ')
+        item.executionTime,
+        item.responseLength,
+        item.originalFileName,
+        item.source
       ]
         .join(' ')
-        .toLowerCase();
+        .replace(/\D/g, '');
 
-      const matchesSearch = debouncedHistorySearch ? searchableText.includes(debouncedHistorySearch) : true;
+      const matchesSearch = debouncedHistorySearch ? numericSearchText.includes(debouncedHistorySearch) : true;
       return matchesSearch && isWithinRange(item.createdAt, historyRange);
     });
   }, [debouncedHistorySearch, historyItems, historyRange]);
@@ -299,7 +295,9 @@ function App() {
     });
 
     dashboardItems.forEach((item) => {
-      const key = new Date(item.createdAt).toISOString().slice(0, 10);
+      const createdAt = new Date(item.createdAt);
+      if (Number.isNaN(createdAt.getTime())) return;
+      const key = createdAt.toISOString().slice(0, 10);
       const day = days.find((entry) => entry.dateKey === key);
       if (day) day.value += 1;
     });
@@ -551,14 +549,20 @@ function App() {
     }).format(new Date(value));
   };
 
-  const addHistoryActivity = async () => {
+  const addHistoryActivity = async ({ historyId, sourceType, sourceName, hasSourceFile } = {}) => {
     try {
       await apiRequest(`/workspaces/${currentWorkspaceId}/activities`, {
         method: 'POST',
         body: JSON.stringify({
           actor_name: userName || 'Người dùng',
           type: 'report_created',
-          message: 'đã tạo một báo cáo nghiên cứu mới'
+          message: sourceName
+            ? `đã tạo một báo cáo nghiên cứu từ "${sourceName}"`
+            : 'đã tạo một báo cáo nghiên cứu mới',
+          history_id: historyId || null,
+          source_type: sourceType || null,
+          source_name: sourceName || null,
+          has_source_file: Boolean(hasSourceFile)
         })
       });
       await Promise.all([loadWorkspaceData(), loadResearchHistory()]);
@@ -594,7 +598,12 @@ function App() {
       }
       if (data.status !== 'success') throw new Error(data.message || 'AI xử lý thất bại');
       setResearchResult(data.markdownReport);
-      await addHistoryActivity();
+      await addHistoryActivity({
+        historyId: data.history_id,
+        sourceType: data.source_type,
+        sourceName: data.source_name || files[0]?.name || webUrl.trim() || 'Nguồn nghiên cứu',
+        hasSourceFile: data.has_source_file
+      });
       setProgressPhase('Hoàn tất phân tích');
       setAppState('done');
     } catch (error) {
@@ -623,10 +632,11 @@ function App() {
     document.body.removeChild(element);
   };
 
-  const downloadOriginalFile = (historyId) => {
+  const downloadOriginalFile = (historyId, options = {}) => {
     const params = new URLSearchParams({
       workspace_id: currentWorkspaceId
     });
+    if (!options.shared && userId) params.set('user_id', userId);
     window.open(`${AI_CORE_API}/research/history/${historyId}/source-file?${params.toString()}`, '_blank', 'noopener,noreferrer');
   };
 
@@ -696,17 +706,14 @@ function App() {
       .catch((error) => setTeamError(error.message));
   };
 
-  const openHistoryDetail = (historyId) => {
+  const openHistoryDetail = (historyId, options = {}) => {
     setHistoryDetailLoading(true);
     setSelectedHistory(null);
 
-    const item = historyItems.find((entry) => entry.id === historyId);
     const params = new URLSearchParams({
       workspace_id: currentWorkspaceId
     });
-    if (item?.isLegacy) {
-      params.set('include_legacy', 'true');
-    }
+    if (!options.shared && userId) params.set('user_id', userId);
 
     apiRequest(`/research/history/${historyId}?${params.toString()}`)
       .then((data) => setSelectedHistory(data.item || null))

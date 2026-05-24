@@ -36,7 +36,15 @@ export function HistoryPage({ ctx }) {
         <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-            <input type="search" value={historySearch} onChange={(e) => setHistorySearch(e.target.value)} placeholder="Tìm kiếm trong lịch sử..." className={`w-full rounded-lg border py-2.5 pl-10 pr-3 text-sm outline-none transition focus:ring-4 ${ui.input}`} />
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={historySearch}
+              onChange={(e) => setHistorySearch(e.target.value.replace(/\D/g, ''))}
+              placeholder="Nhập số ID, ngày, tháng, năm..."
+              className={`w-full rounded-lg border py-2.5 pl-10 pr-3 text-sm outline-none transition focus:ring-4 ${ui.input}`}
+            />
           </div>
           <div className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold ${ui.softBorder} ${ui.soft} ${ui.muted}`}>
             <CalendarDays className="h-4 w-4" />
@@ -81,7 +89,7 @@ export function HistoryPage({ ctx }) {
           <div className={`rounded-xl border border-dashed p-10 text-center ${ui.softBorder} ${ui.soft}`}>
             <Search className={`mx-auto mb-3 h-8 w-8 ${ui.muted}`} />
             <h3 className={`font-semibold ${ui.text}`}>Không tìm thấy lịch sử phù hợp</h3>
-            <p className={`mt-1 text-sm ${ui.muted}`}>Thử tìm theo ID, ngày, nguồn hoặc trạng thái khác.</p>
+            <p className={`mt-1 text-sm ${ui.muted}`}>Thử nhập số ID hoặc chọn ngày tháng bằng bộ lọc lịch.</p>
           </div>
         )}
 

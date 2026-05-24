@@ -573,14 +573,20 @@ async def create_activity(workspace_id: str, payload: ActivityRequest):
 
     now = datetime.utcnow()
 
-    db["workspace_activities"].insert_one({
+    activity_doc = {
         "id": f"act_{uuid.uuid4().hex[:10]}",
         "workspace_id": workspace_id,
         "actor_name": payload.actor_name,
         "type": payload.type,
         "message": payload.message,
+        "history_id": payload.history_id,
+        "source_type": payload.source_type,
+        "source_name": payload.source_name,
+        "has_source_file": payload.has_source_file,
         "created_at": now
-    })
+    }
+
+    db["workspace_activities"].insert_one(activity_doc)
 
     db["notifications"].insert_one({
         "id": f"noti_{uuid.uuid4().hex[:10]}",
@@ -588,6 +594,10 @@ async def create_activity(workspace_id: str, payload: ActivityRequest):
         "type": payload.type,
         "title": "Hoạt động mới",
         "message": f"{payload.actor_name} {payload.message}",
+        "history_id": payload.history_id,
+        "source_type": payload.source_type,
+        "source_name": payload.source_name,
+        "has_source_file": payload.has_source_file,
         "read": False,
         "resolved": False,
         "created_at": now

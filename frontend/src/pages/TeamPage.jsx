@@ -117,71 +117,117 @@ export function TeamPage({ ctx }) {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_0.6fr]">
         <section className={`overflow-hidden rounded-xl border shadow-sm ${ui.card}`}>
-          <div className="border-b border-slate-200 p-5">
-            <h3 className={`font-semibold ${ui.text}`}>Danh sách thành viên</h3>
-            <p className={`mt-1 text-sm ${ui.muted}`}>Phân quyền và trạng thái tham gia nhóm.</p>
+          <div className="flex flex-col justify-between gap-3 border-b border-slate-200 p-5 sm:flex-row sm:items-center">
+            <div>
+              <h3 className={`font-semibold ${ui.text}`}>Thông báo hoạt động nhóm</h3>
+              <p className={`mt-1 text-sm ${ui.muted}`}>Thành viên cùng nhóm có thể xem nghiên cứu và tải file được chia sẻ từ hoạt động tại đây.</p>
+            </div>
+            <button onClick={() => loadWorkspaceData()} className={`flex w-fit items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${ui.secondaryButton}`}>
+              <Bell className="h-4 w-4" />
+              Làm mới
+            </button>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
-              <thead className={ui.soft}>
-                <tr className={ui.muted}>
-                  <th className="px-5 py-3 font-semibold">Thành viên</th>
-                  <th className="px-5 py-3 font-semibold">Email</th>
-                  <th className="px-5 py-3 font-semibold">Vai trò</th>
-                  <th className="px-5 py-3 font-semibold">Trạng thái</th>
-                  <th className="px-5 py-3 text-right font-semibold">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {members.map((member) => (
-                  <tr key={member.id || member._id} className={`border-t ${ui.softBorder}`}>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
-                          {member.avatar || member.name?.slice(0, 2).toUpperCase() || 'SR'}
-                        </div>
-                        <span className={`font-semibold ${ui.text}`}>{member.name}</span>
-                      </div>
-                    </td>
-                    <td className={`px-5 py-4 ${ui.muted}`}>{member.email}</td>
-                    <td className="px-5 py-4">
-                      <span className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold ${ui.softBorder} ${ui.soft} ${ui.text}`}>
-                        <Shield className="h-3.5 w-3.5" />
-                        {member.role}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className={`inline-flex whitespace-nowrap rounded-lg px-2.5 py-1 text-xs font-semibold ${['active', 'Đang hoạt động'].includes(member.status) ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
-                        {member.status === 'active' ? 'Đang hoạt động' : member.status === 'pending' ? 'Đang chờ duyệt' : member.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex justify-end gap-2">
-                        <button onClick={() => changeMemberRole(member.id || member._id)} className={`rounded-lg border p-2 transition ${ui.secondaryButton}`} title="Đổi quyền">
-                          <MoreHorizontal className="h-4 w-4" />
+
+          <div className="divide-y divide-slate-200">
+            {activities.map((activity) => (
+              <article key={activity.id || activity._id} className="p-5 transition hover:bg-blue-50/40 dark:hover:bg-slate-800/50">
+                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                  <div className="flex gap-3">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                      {activity.avatar || activity.actor_name?.slice(0, 2).toUpperCase() || 'SR'}
+                    </div>
+                    <div className="min-w-0">
+                      <p className={`text-sm leading-6 ${ui.text}`}>
+                        <span className="font-semibold">{activity.memberName || activity.actor_name}</span> {activity.action || activity.message}
+                      </p>
+                      {(activity.source_name || activity.source_type) && (
+                        <p className={`mt-1 flex items-center gap-2 text-sm ${ui.muted}`}>
+                          <FileText className="h-4 w-4 flex-shrink-0" />
+                          <span className="truncate">{activity.source_name || activity.source_type}</span>
+                        </p>
+                      )}
+                      <p className={`mt-2 text-xs ${ui.muted}`}>
+                        {activity.time || (activity.created_at ? formatDateTime(activity.created_at) : '')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {activity.history_id && (
+                    <div className="flex flex-wrap gap-2 md:justify-end">
+                      <button onClick={() => openHistoryDetail(activity.history_id, { shared: true })} className="flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700">
+                        <BookOpen className="h-4 w-4" />
+                        Xem nghiên cứu
+                      </button>
+                      {activity.has_source_file && (
+                        <button onClick={() => downloadOriginalFile(activity.history_id, { shared: true })} className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${ui.secondaryButton}`}>
+                          <Download className="h-4 w-4" />
+                          Tải file
                         </button>
-                        <button onClick={() => removeMember(member.id || member._id)} className="rounded-lg border border-red-200 bg-white p-2 text-red-600 transition hover:bg-red-50" title="Xóa thành viên">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {!teamLoading && members.length === 0 && (
-                  <tr>
-                    <td colSpan="5" className={`px-5 py-10 text-center ${ui.muted}`}>
-                      Chưa có thành viên nào trong MongoDB.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </article>
+            ))}
+            {!teamLoading && activities.length === 0 && (
+              <div className={`m-5 rounded-xl border border-dashed p-8 text-center text-sm ${ui.softBorder} ${ui.muted}`}>
+                Chưa có thông báo hoạt động nhóm trong MongoDB.
+              </div>
+            )}
           </div>
         </section>
 
         <section className="space-y-6">
+          <div className={`rounded-xl border p-5 shadow-sm ${ui.card}`}>
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h3 className={`font-semibold ${ui.text}`}>Thành viên</h3>
+                <p className={`mt-1 text-sm ${ui.muted}`}>{members.length} người trong workspace</p>
+              </div>
+              <Users className={`h-5 w-5 ${ui.muted}`} />
+            </div>
+
+            <div className="space-y-3">
+              {members.map((member) => (
+                <div key={member.id || member._id} className={`rounded-xl border p-3 ${ui.softBorder} ${ui.soft}`}>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+                      {member.avatar || member.name?.slice(0, 2).toUpperCase() || 'SR'}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className={`truncate text-sm font-semibold ${ui.text}`}>{member.name || 'Thành viên'}</p>
+                      <p className={`truncate text-xs ${ui.muted}`}>{member.email}</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <span className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-xs font-semibold ${ui.softBorder} ${ui.card} ${ui.text}`}>
+                          <Shield className="h-3.5 w-3.5" />
+                          {member.role}
+                        </span>
+                        <span className={`inline-flex whitespace-nowrap rounded-lg px-2 py-1 text-xs font-semibold ${['active', 'Đang hoạt động'].includes(member.status) ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                          {member.status === 'active' ? 'Đang hoạt động' : member.status === 'pending' ? 'Đang chờ duyệt' : member.status}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-shrink-0 gap-1">
+                      <button onClick={() => changeMemberRole(member.id || member._id)} className={`rounded-lg border p-2 transition ${ui.secondaryButton}`} title="Đổi quyền">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => removeMember(member.id || member._id)} className="rounded-lg border border-red-200 bg-white p-2 text-red-600 transition hover:bg-red-50" title="Xóa thành viên">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {!teamLoading && members.length === 0 && (
+                <div className={`rounded-xl border border-dashed p-5 text-center text-sm ${ui.softBorder} ${ui.muted}`}>
+                  Chưa có thành viên nào trong MongoDB.
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className={`rounded-xl border p-5 shadow-sm ${ui.card}`}>
             <h3 className={`font-semibold ${ui.text}`}>Tham gia bằng link</h3>
             <p className={`mt-1 text-sm leading-6 ${ui.muted}`}>
@@ -224,35 +270,39 @@ export function TeamPage({ ctx }) {
               {joinMessage && <p className={`text-sm leading-6 ${ui.muted}`}>{joinMessage}</p>}
             </form>
           </div>
-
-          <div className={`rounded-xl border p-5 shadow-sm ${ui.card}`}>
-            <h3 className={`font-semibold ${ui.text}`}>Hoạt động gần đây</h3>
-            <p className={`mt-1 text-sm ${ui.muted}`}>Timeline cộng tác của nhóm.</p>
-            <div className="mt-5 space-y-4">
-            {activities.map((activity) => (
-              <div key={activity.id || activity._id} className="flex gap-3">
-                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
-                  {activity.avatar || activity.actor_name?.slice(0, 2).toUpperCase() || 'SR'}
-                </div>
-                <div className={`flex-1 rounded-xl border p-3 ${ui.softBorder} ${ui.soft}`}>
-                  <p className={`text-sm leading-6 ${ui.text}`}>
-                    <span className="font-semibold">{activity.memberName || activity.actor_name}</span> {activity.action || activity.message}
-                  </p>
-                  <p className={`mt-1 text-xs ${ui.muted}`}>
-                    {activity.time || (activity.created_at ? formatDateTime(activity.created_at) : '')}
-                  </p>
-                </div>
-              </div>
-            ))}
-            {!teamLoading && activities.length === 0 && (
-              <div className={`rounded-xl border border-dashed p-5 text-center text-sm ${ui.softBorder} ${ui.muted}`}>
-                Chưa có hoạt động nhóm trong MongoDB.
-              </div>
-            )}
-            </div>
-          </div>
         </section>
       </div>
+
+      {(selectedHistory || historyDetailLoading) && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/60 p-4">
+          <div className={`max-h-[88vh] w-full max-w-4xl overflow-hidden rounded-xl border shadow-xl ${ui.card}`}>
+            <div className={`flex items-start justify-between gap-3 border-b p-5 ${ui.softBorder}`}>
+              <div>
+                <h3 className={`text-lg font-semibold ${ui.text}`}>
+                  {historyDetailLoading ? 'Đang tải nghiên cứu...' : selectedHistory?.title}
+                </h3>
+                {selectedHistory && (
+                  <p className={`mt-1 text-sm ${ui.muted}`}>
+                    {selectedHistory.source} • {formatDateTime(selectedHistory.createdAt)}
+                  </p>
+                )}
+              </div>
+              <button onClick={() => setSelectedHistory(null)} className={`rounded-lg border p-2 ${ui.secondaryButton}`}>
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="max-h-[64vh] overflow-y-auto p-5">
+              {historyDetailLoading && <div className={`text-sm ${ui.muted}`}>Đang lấy nội dung từ MongoDB...</div>}
+              {selectedHistory && (
+                <pre className={`whitespace-pre-wrap rounded-xl border p-4 text-sm leading-7 ${ui.softBorder} ${ui.soft} ${ui.text}`}>
+                  {selectedHistory.content}
+                </pre>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {settingsOpen && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/60 p-4">

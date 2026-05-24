@@ -52,6 +52,14 @@ class ActivityRequest(BaseModel):
 
     message: str
 
+    history_id: Optional[str] = None
+
+    source_type: Optional[str] = None
+
+    source_name: Optional[str] = None
+
+    has_source_file: bool = False
+
 
 class NotificationResolveRequest(BaseModel):
 

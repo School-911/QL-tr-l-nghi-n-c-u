@@ -50,9 +50,11 @@ def require_mongo():
 
 def save_history(data: dict):
     if mongo_collection is None:
-        return
+        return None
 
     try:
-        mongo_collection.insert_one(data)
+        result = mongo_collection.insert_one(data)
+        return result.inserted_id
     except Exception as e:
         print(f"[WARN] Mongo save failed: {e}")
+        return None

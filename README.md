@@ -12,15 +12,87 @@ School Research là web trợ lý nghiên cứu dùng AI để phân tích tài 
 - Trung tâm thông báo cho lời mời, yêu cầu tham gia, thông báo hệ thống.
 - Hỗ trợ nhiều provider AI: Llama API/Groq/Together/OpenRouter, Ollama local, Gemini, OpenAI.
 
-## Kiến trúc thư mục
+## Cấu trúc thư mục chi tiết
 
 ```text
 tro_ly_nghien_cuu/
-├── frontend/   # React + Vite + TailwindCSS
-├── backend/    # Node.js + Express, auth, upload file
-├── ai_core/    # FastAPI, xử lý AI, MongoDB history/workspace
-└── .gitignore
+├── frontend/                         # Ứng dụng giao diện React + Vite + TailwindCSS
+│   ├── src/
+│   │   ├── App.jsx                   # Component gốc, quản lý state chính và điều hướng trang
+│   │   ├── main.jsx                  # Điểm khởi chạy React
+│   │   ├── index.css                 # TailwindCSS và style toàn cục
+│   │   ├── components/               # Component dùng chung
+│   │   │   ├── AppHeader.jsx         # Thanh điều hướng, logo, theme, thông báo
+│   │   │   ├── AuthScreen.jsx        # Giao diện đăng nhập, đăng ký, quên mật khẩu
+│   │   │   ├── DateFilter.jsx        # Bộ lọc ngày dùng cho lịch sử và biểu đồ
+│   │   │   └── charts.jsx            # Stat cards, biểu đồ cột, biểu đồ donut
+│   │   ├── pages/                    # Các trang chức năng chính
+│   │   │   ├── HomePage.jsx          # Trang chủ: thiết lập câu hỏi, upload file/URL, kết quả
+│   │   │   ├── HistoryPage.jsx       # Trang lịch sử: tìm kiếm, lọc ngày, phân trang, chi tiết
+│   │   │   ├── AnalyticsPage.jsx     # Trang biểu đồ và thống kê
+│   │   │   ├── TeamPage.jsx          # Trang quản lý nhóm/workspace
+│   │   │   └── NotificationsPage.jsx # Trang thông báo hệ thống và lời mời
+│   │   ├── lib/
+│   │   │   ├── constants.js          # Hằng số dùng chung
+│   │   │   └── helpers.js            # Hàm tiện ích: ngày tháng, workspace, mật khẩu
+│   │   └── services/
+│   │       └── api.js                # Hàm gọi API dùng chung cho frontend
+│   ├── package.json                  # Scripts và dependencies frontend
+│   ├── vite.config.js                # Cấu hình Vite
+│   └── tailwind.config.js            # Cấu hình TailwindCSS
+│
+├── backend/                          # API trung gian Node.js + Express
+│   ├── src/
+│   │   ├── server.js                 # Điểm khởi chạy Express server
+│   │   ├── config/
+│   │   │   ├── db.js                 # Kết nối MongoDB
+│   │   │   └── mailer.js             # Cấu hình gửi email quên mật khẩu
+│   │   ├── controllers/
+│   │   │   ├── auth.controller.js    # Đăng ký, đăng nhập, quên/đặt lại mật khẩu
+│   │   │   ├── file.controller.js    # Upload file và chuyển request sang AI Core
+│   │   │   ├── health.controller.js  # Endpoint kiểm tra trạng thái backend
+│   │   │   └── research.controller.js# Controller liên quan nghiên cứu
+│   │   ├── middlewares/
+│   │   │   └── auth.middleware.js    # Middleware xác thực JWT
+│   │   ├── models/
+│   │   │   ├── user.model.js         # Schema người dùng
+│   │   │   ├── file.model.js         # Schema file
+│   │   │   └── researchHistory.model.js # Schema lịch sử nghiên cứu phía backend
+│   │   ├── routes/
+│   │   │   └── api.routes.js         # Khai báo route API chính
+│   │   └── utils/
+│   │       └── password.js           # Kiểm tra độ mạnh mật khẩu
+│   ├── package.json                  # Scripts và dependencies backend
+│   └── uploads/                      # File upload runtime, không commit lên Git
+│
+├── ai_core/                          # Dịch vụ FastAPI xử lý AI, lịch sử, workspace
+│   ├── app.py                        # Điểm khởi chạy FastAPI, CORS, include router
+│   ├── schemas.py                    # Pydantic schema cho request/response
+│   ├── requirements.txt              # Dependencies Python
+│   ├── core/
+│   │   ├── settings.py               # Đọc biến môi trường, cấu hình AI/MongoDB
+│   │   ├── database.py               # Kết nối MongoDB, serialize, lưu lịch sử
+│   │   └── __init__.py
+│   ├── routers/
+│   │   ├── system.py                 # Health check và route hệ thống
+│   │   ├── research.py               # Xử lý nghiên cứu, lịch sử, tải file gốc
+│   │   ├── workspaces.py             # Workspace, thành viên, thông báo, hoạt động nhóm
+│   │   └── __init__.py
+│   └── services/
+│       ├── ai_providers.py           # Gọi Llama/Groq/Ollama/Gemini/OpenAI
+│       ├── extractors.py             # Trích xuất nội dung từ file hoặc URL
+│       └── workspaces.py             # Logic tiện ích cho workspace và notification
+│
+├── README.md                         # Tài liệu giới thiệu và hướng dẫn chạy dự án
+└── .gitignore                        # Chặn .env, node_modules, dist, venv, uploads...
 ```
+
+Các thư mục/file runtime không nên commit lên Git:
+
+- `frontend/node_modules/`, `frontend/dist/`
+- `backend/node_modules/`, `backend/uploads/`
+- `ai_core/venv/`, `ai_core/__pycache__/`
+- Tất cả file `.env`
 
 Luồng xử lý chính:
 
@@ -248,4 +320,3 @@ Kiểm tra:
 - AI Core đang chạy port `8000`.
 - `backend/.env` có `AI_CORE_URL=http://localhost:8000`.
 - File không vượt quá 50MB.
-

@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 import fitz
 import requests
 from bs4 import BeautifulSoup
+from fastapi import HTTPException
 
 def extract_pdf_text(file_path: str):
 

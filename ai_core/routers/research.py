@@ -32,15 +32,8 @@ async def get_research_history(
     query_filter = {}
 
     if workspace_id:
-        if include_legacy:
-            query_filter["$or"] = [
-                {"workspace_id": workspace_id},
-                {"workspace_id": {"$exists": False}},
-                {"workspace_id": None}
-            ]
-        else:
-            query_filter["workspace_id"] = workspace_id
-    elif user_id:
+        query_filter["workspace_id"] = workspace_id
+    if user_id:
         query_filter["user_id"] = user_id
 
     records = list(
@@ -109,15 +102,8 @@ async def get_research_history_detail(
     }
 
     if workspace_id:
-        if include_legacy:
-            query_filter["$or"] = [
-                {"workspace_id": workspace_id},
-                {"workspace_id": {"$exists": False}},
-                {"workspace_id": None}
-            ]
-        else:
-            query_filter["workspace_id"] = workspace_id
-    elif user_id:
+        query_filter["workspace_id"] = workspace_id
+    if user_id:
         query_filter["user_id"] = user_id
 
     record = db[MONGO_COLLECTION].find_one(query_filter)
@@ -174,7 +160,7 @@ async def download_research_source_file(history_id: str, workspace_id: Optional[
 
     if workspace_id:
         query_filter["workspace_id"] = workspace_id
-    elif user_id:
+    if user_id:
         query_filter["user_id"] = user_id
 
     record = db[MONGO_COLLECTION].find_one(query_filter)
@@ -383,7 +369,7 @@ Tiếng Việt học thuật.
         # SAVE HISTORY
         # =====================================================
 
-        save_history({
+        history_id = save_history({
             "workspace_id": workspace_id,
             "user_id": request.user_id,
             "user_email": request.user_email,
@@ -409,9 +395,12 @@ Tiếng Việt học thuật.
 
         return {
             "status": "success",
+            "history_id": str(history_id) if history_id else None,
             "ai_provider": ai_provider,
             "processing_time": elapsed,
             "source_type": source_type,
+            "source_name": request.original_file_name or request.web_url or request.file_path,
+            "has_source_file": bool(request.file_path),
             "markdownReport": result
         }
 

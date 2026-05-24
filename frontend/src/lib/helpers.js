@@ -44,9 +44,15 @@ export const getRangeDates = (preset, customStart, customEnd) => {
     return { start: rangeStart, end };
   }
   if (preset === 'custom' && customStart && customEnd) {
+    const startDate = new Date(customStart);
+    const endDate = new Date(customEnd);
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      return { start: null, end: null };
+    }
+
     return {
-      start: startOfDay(new Date(customStart)),
-      end: endOfDay(new Date(customEnd))
+      start: startOfDay(startDate),
+      end: endOfDay(endDate)
     };
   }
 
@@ -54,7 +60,9 @@ export const getRangeDates = (preset, customStart, customEnd) => {
 };
 
 export const isWithinRange = (value, range) => {
-  if (!range.start || !range.end) return true;
+  if (!value) return false;
   const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+  if (!range.start || !range.end) return true;
   return date >= range.start && date <= range.end;
 };
