@@ -324,6 +324,29 @@ Thường nguyên nhân thật là AI Core trả lỗi `500`. Hãy kiểm tra te
 http://localhost:8000/health
 ```
 
+### Deploy Vercel/Render bị `Failed to fetch` khi đăng nhập hoặc đăng ký
+
+Nguyên nhân thường gặp là frontend production vẫn gọi `localhost`, URL Render sai, hoặc Vercel chưa redeploy sau khi đổi biến môi trường.
+
+Kiểm tra nhanh:
+
+- Trên trang đăng nhập bấm **Kiểm tra kết nối API** để xem frontend đang gọi backend URL nào.
+- Mở trực tiếp URL health của backend Render:
+
+```text
+https://<backend-render-service>.onrender.com/api/health
+```
+
+- Trong Vercel phải có biến:
+
+```env
+VITE_BACKEND_API_URL=https://<backend-render-service>.onrender.com
+VITE_AI_CORE_API_URL=https://<ai-core-render-service>.onrender.com
+```
+
+- Sau khi thêm/sửa biến môi trường trên Vercel, cần **Redeploy** frontend.
+- Không dùng `http://` cho Render khi frontend chạy `https://`, vì trình duyệt có thể chặn mixed content.
+
 ### Không gửi được email quên mật khẩu
 
 Kiểm tra `backend/.env` có `GMAIL_USER` và `GMAIL_APP_PASSWORD`, hoặc cấu hình SMTP đầy đủ. Với Gmail cần dùng App Password, không dùng mật khẩu đăng nhập Gmail thường.

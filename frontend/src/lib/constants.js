@@ -1,7 +1,12 @@
 export const THEME_STORAGE_KEY = 'schoolResearchTheme';
 export const HISTORY_PAGE_SIZE = 6;
-export const BACKEND_API = import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:5000';
-export const AI_CORE_API = import.meta.env.VITE_AI_CORE_API_URL || 'http://localhost:8000';
+
+const normalizeApiUrl = (value, fallback) => {
+  return (value || fallback).replace(/\/+$/, '');
+};
+
+export const BACKEND_API = normalizeApiUrl(import.meta.env.VITE_BACKEND_API_URL, 'http://localhost:5000').replace(/\/api$/, '');
+export const AI_CORE_API = normalizeApiUrl(import.meta.env.VITE_AI_CORE_API_URL, 'http://localhost:8000');
 
 export const passwordRules = [
   ['length', 'Tối thiểu 6 ký tự', (value) => value.length >= 6],

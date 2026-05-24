@@ -136,6 +136,58 @@ function App() {
     return data;
   };
 
+  const backendRequest = async (path, options = {}) => {
+    const url = `${BACKEND_API}${path}`;
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(options.headers || {})
+        }
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.message || data.detail || `Backend trả về HTTP ${response.status}.`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('[School Research] Backend request failed', {
+        url,
+        backendApi: BACKEND_API,
+        online: navigator.onLine,
+        error
+      });
+
+      if (error instanceof TypeError) {
+        throw new Error(
+          `Không thể kết nối Backend (${BACKEND_API}). ` +
+          'Hãy kiểm tra VITE_BACKEND_API_URL trên Vercel phải là URL Render dạng https://..., backend Render đang bật, và đã Redeploy frontend sau khi đổi biến môi trường.'
+        );
+      }
+
+      throw error;
+    }
+  };
+
+  const checkBackendConnection = async () => {
+    setAuthError('');
+    setAuthSuccess('');
+
+    try {
+      const data = await backendRequest('/api/health', {
+        method: 'GET'
+      });
+      setAuthSuccess(`Kết nối Backend thành công: ${data.message || BACKEND_API}`);
+    } catch (error) {
+      setAuthError(error.message);
+    }
+  };
+
   const loadWorkspaceData = async (workspaceId = currentWorkspaceId) => {
     setTeamLoading(true);
     setTeamError('');
@@ -366,13 +418,10 @@ function App() {
       return;
     }
     try {
-      const response = await fetch(`${BACKEND_API}/api/auth/login`, {
+      const data = await backendRequest('/api/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.message || 'Đăng nhập thất bại.');
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('userEmail', data.user.email);
       localStorage.setItem('userName', data.user.fullName);
@@ -403,13 +452,10 @@ function App() {
       return;
     }
     try {
-      const response = await fetch(`${BACKEND_API}/api/auth/register`, {
+      const data = await backendRequest('/api/auth/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fullName, email, password })
       });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.message || 'Đăng ký thất bại.');
       setAuthSuccess('Đăng ký thành công! Hãy đăng nhập.');
       setAuthView('login');
       setPassword('');
@@ -429,13 +475,10 @@ function App() {
     }
 
     try {
-      const response = await fetch(`${BACKEND_API}/api/auth/forgot-password`, {
+      const data = await backendRequest('/api/auth/forgot-password', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: resetEmail.trim() })
       });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.message || 'Không thể gửi mã xác nhận.');
       setAuthSuccess(data.message || 'Mã xác nhận đã được gửi tới email.');
       setResetStep('code');
     } catch (error) {
@@ -459,17 +502,14 @@ function App() {
     }
 
     try {
-      const response = await fetch(`${BACKEND_API}/api/auth/reset-password`, {
+      const data = await backendRequest('/api/auth/reset-password', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: resetEmail.trim(),
           code: resetCode.trim(),
           password: resetPasswordValue
         })
       });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.message || 'Không thể đặt lại mật khẩu.');
       setAuthSuccess(data.message || 'Mật khẩu đã được cập nhật.');
       setAuthView('login');
       setEmail(resetEmail.trim());
@@ -802,6 +842,8 @@ function App() {
         handleRegister={handleRegister}
         handleForgotPassword={handleForgotPassword}
         handleResetPassword={handleResetPassword}
+        checkBackendConnection={checkBackendConnection}
+        backendApi={BACKEND_API}
       />
     );
   }
