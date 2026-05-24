@@ -119,6 +119,10 @@ function App() {
   }, [theme]);
 
   const apiRequest = async (path, options = {}) => {
+    if (!AI_CORE_API) {
+      throw new Error('Frontend production chưa cấu hình VITE_AI_CORE_API_URL.');
+    }
+
     const response = await fetch(`${AI_CORE_API}${path}`, {
       ...options,
       headers: {
@@ -137,6 +141,10 @@ function App() {
   };
 
   const backendRequest = async (path, options = {}) => {
+    if (!BACKEND_API) {
+      throw new Error('Frontend production chưa cấu hình VITE_BACKEND_API_URL trên Vercel.');
+    }
+
     const url = `${BACKEND_API}${path}`;
     const startedAt = Date.now();
     const hasBody = Boolean(options.body);
@@ -182,20 +190,6 @@ function App() {
       }
 
       throw error;
-    }
-  };
-
-  const checkBackendConnection = async () => {
-    setAuthError('');
-    setAuthSuccess('');
-
-    try {
-      const data = await backendRequest('/api/health', {
-        method: 'GET'
-      });
-      setAuthSuccess(`Kết nối Backend thành công: ${data.message || BACKEND_API}. URL: ${BACKEND_API}/api/health`);
-    } catch (error) {
-      setAuthError(error.message);
     }
   };
 
@@ -853,8 +847,6 @@ function App() {
         handleRegister={handleRegister}
         handleForgotPassword={handleForgotPassword}
         handleResetPassword={handleResetPassword}
-        checkBackendConnection={checkBackendConnection}
-        backendApi={BACKEND_API}
       />
     );
   }

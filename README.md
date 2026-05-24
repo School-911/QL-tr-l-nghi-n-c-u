@@ -346,6 +346,7 @@ VITE_AI_CORE_API_URL=https://<ai-core-render-service>.onrender.com
 
 - Sau khi thêm/sửa biến môi trường trên Vercel, cần **Redeploy** frontend.
 - Không dùng `http://` cho Render khi frontend chạy `https://`, vì trình duyệt có thể chặn mixed content.
+- Bản production sẽ không fallback về `localhost`; nếu thiếu env, màn hình sẽ báo `Frontend production chưa cấu hình VITE_BACKEND_API_URL`.
 
 ### Không gửi được email quên mật khẩu
 

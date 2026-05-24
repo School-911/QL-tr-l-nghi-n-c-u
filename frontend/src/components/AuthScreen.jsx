@@ -25,9 +25,7 @@ export function AuthScreen({
   handleLogin,
   handleRegister,
   handleForgotPassword,
-  handleResetPassword,
-  checkBackendConnection,
-  backendApi
+  handleResetPassword
 }) {
   const title = {
     login: 'Đăng nhập hệ thống',
@@ -131,16 +129,6 @@ export function AuthScreen({
           </form>
 
           <div className="mt-6 border-t border-white/5 pt-6 text-center text-xs text-slate-500">
-            <button
-              type="button"
-              onClick={checkBackendConnection}
-              className="mb-4 rounded-lg border border-slate-700 px-3 py-2 font-semibold text-slate-300 transition hover:border-blue-500/60 hover:text-blue-300"
-            >
-              Kiểm tra kết nối API
-            </button>
-            <p className="mb-4 break-all text-[11px] text-slate-600">
-              Backend: {backendApi}
-            </p>
             {authView === 'login' ? (
               <div className="space-y-3">
                 <button onClick={() => { setAuthView('forgot'); setAuthError(''); setAuthSuccess(''); setResetEmail(email); }} className="font-semibold text-blue-400 transition hover:text-blue-300">

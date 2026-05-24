@@ -5,8 +5,19 @@ const normalizeApiUrl = (value, fallback) => {
   return (value || fallback).replace(/\/+$/, '');
 };
 
-export const BACKEND_API = normalizeApiUrl(import.meta.env.VITE_BACKEND_API_URL, 'http://localhost:5000').replace(/\/api$/, '');
-export const AI_CORE_API = normalizeApiUrl(import.meta.env.VITE_AI_CORE_API_URL, 'http://localhost:8000');
+const isLocalHost =
+  typeof window !== 'undefined' &&
+  ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+export const BACKEND_API = normalizeApiUrl(
+  import.meta.env.VITE_BACKEND_API_URL,
+  isLocalHost ? 'http://localhost:5000' : ''
+).replace(/\/api$/, '');
+
+export const AI_CORE_API = normalizeApiUrl(
+  import.meta.env.VITE_AI_CORE_API_URL,
+  isLocalHost ? 'http://localhost:8000' : ''
+);
 
 export const passwordRules = [
   ['length', 'Tối thiểu 6 ký tự', (value) => value.length >= 6],
