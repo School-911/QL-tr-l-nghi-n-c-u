@@ -28,12 +28,16 @@ if (!fs.existsSync(uploadDir)) {
 // Cấu hình Middleware
 // ==========================================
 
-// Xử lý CORS - Cho phép Frontend React truy cập
-app.use(cors({
-  origin: '*', // Trong môi trường sản xuất nên cấu hình cụ thể ví dụ: 'http://localhost:3000'
+// Xử lý CORS - Cho phép Frontend React/Vercel truy cập
+const corsOptions = {
+  origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map((item) => item.trim()) : '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Middleware phân tích cú pháp dữ liệu JSON đầu vào
 app.use(express.json());

@@ -138,12 +138,17 @@ function App() {
 
   const backendRequest = async (path, options = {}) => {
     const url = `${BACKEND_API}${path}`;
+    const startedAt = Date.now();
+    const hasBody = Boolean(options.body);
 
     try {
       const response = await fetch(url, {
         ...options,
+        mode: 'cors',
+        cache: 'no-store',
         headers: {
-          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
           ...(options.headers || {})
         }
       });
@@ -159,14 +164,20 @@ function App() {
       console.error('[School Research] Backend request failed', {
         url,
         backendApi: BACKEND_API,
+        elapsedMs: Date.now() - startedAt,
+        userAgent: navigator.userAgent,
         online: navigator.onLine,
         error
       });
 
       if (error instanceof TypeError) {
+        const httpsHint = BACKEND_API.startsWith('http://')
+          ? ' Backend URL đang dùng http://, hãy đổi sang https:// để tránh bị chặn mixed content trên mobile.'
+          : '';
+
         throw new Error(
-          `Không thể kết nối Backend (${BACKEND_API}). ` +
-          'Hãy kiểm tra VITE_BACKEND_API_URL trên Vercel phải là URL Render dạng https://..., backend Render đang bật, và đã Redeploy frontend sau khi đổi biến môi trường.'
+          `Failed to fetch tới Backend (${url}).` +
+          `${httpsHint} Hãy mở trực tiếp ${BACKEND_API}/api/health trên điện thoại; nếu không mở được thì Render service/URL/network đang lỗi. Nếu mở được nhưng app vẫn lỗi thì kiểm tra CORS/preflight trong log Render.`
         );
       }
 
@@ -182,7 +193,7 @@ function App() {
       const data = await backendRequest('/api/health', {
         method: 'GET'
       });
-      setAuthSuccess(`Kết nối Backend thành công: ${data.message || BACKEND_API}`);
+      setAuthSuccess(`Kết nối Backend thành công: ${data.message || BACKEND_API}. URL: ${BACKEND_API}/api/health`);
     } catch (error) {
       setAuthError(error.message);
     }
